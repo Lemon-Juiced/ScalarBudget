@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CopilotDiffPersistence">
+    <option name="pendingDiffs">
+      <map>
+        <entry key="$PROJECT_DIR$/src/main/java/site/scalarstudios/scalarbudget/Launcher.java">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/src/main/java/site/scalarstudios/scalarbudget/Launcher.java" />
+              <option name="originalContent" value="package site.scalarstudios.scalarbudget;&#10;&#10;import javafx.application.Application;&#10;&#10;/**&#10; * The Launcher class serves as the entry point for the ScalarBudget application.&#10; * It launches the JavaFX application by invoking the Application.launch method&#10; * with the ScalarBudgetApplication class and command-line arguments.&#10; */&#10;public class Launcher {&#10;    public static void main(String[] args) {&#10;        Application.launch(ScalarBudgetApplication.class, args);&#10;    }&#10;}&#10;" />
+              <option name="updatedContent" value="package site.scalarstudios.scalarbudget.app;&#10;&#10;import javafx.application.Application;&#10;import site.scalarstudios.scalarbudget.app.ScalarBudgetApplication;&#10;&#10;/**&#10; * The Launcher class serves as the entry point for the ScalarBudget application.&#10; * It launches the JavaFX application by invoking the Application.launch method&#10; * with the ScalarBudgetApplication class and command-line arguments.&#10; */&#10;public class Launcher {&#10;    public static void main(String[] args) {&#10;        Application.launch(ScalarBudgetApplication.class, args);&#10;    }&#10;}" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/src/main/java/site/scalarstudios/scalarbudget/LoadingScene.java">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/src/main/java/site/scalarstudios/scalarbudget/LoadingScene.java" />
+              <option name="updatedContent" value="package site.scalarstudios.scalarbudget;&#10;&#10;import javafx.scene.Scene;&#10;import javafx.scene.control.Button;&#10;import javafx.scene.control.Label;&#10;import javafx.scene.layout.VBox;&#10;import javafx.stage.FileChooser;&#10;import javafx.stage.Stage;&#10;&#10;import java.io.File;&#10;import java.util.List;&#10;import java.util.function.Consumer;&#10;&#10;public class LoadingScene {&#10;    private final Scene scene;&#10;&#10;    public LoadingScene(Stage stage, Consumer&lt;List&lt;BudgetItem&gt;&gt; onBudgetLoaded, Consumer&lt;String&gt; onError) {&#10;        Label infoLabel = new Label(&quot;Please load a budget JSON file.&quot;);&#10;        Button loadButton = new Button(&quot;Load JSON&quot;);&#10;&#10;        VBox layout = new VBox(20, infoLabel, loadButton);&#10;        layout.setStyle(&quot;-fx-alignment: center;&quot;);&#10;        this.scene = new Scene(layout, 400, 300);&#10;&#10;        loadButton.setOnAction(e -&gt; {&#10;            FileChooser fileChooser = new FileChooser();&#10;            fileChooser.setTitle(&quot;Open Budget JSON File&quot;);&#10;            fileChooser.getExtensionFilters().add(&#10;                    new FileChooser.ExtensionFilter(&quot;JSON Files&quot;, &quot;*.json&quot;)&#10;            );&#10;            File selectedFile = fileChooser.showOpenDialog(stage);&#10;&#10;            if (selectedFile != null) {&#10;                List&lt;BudgetItem&gt; budgetItems = BudgetLoader.loadBudgetFile(selectedFile);&#10;                if (!budgetItems.isEmpty()) {&#10;                    onBudgetLoaded.accept(budgetItems);&#10;                } else {&#10;                    onError.accept(&quot;Failed to load or parse file: &quot; + selectedFile.getName());&#10;                }&#10;            }&#10;        });&#10;    }&#10;&#10;    public Scene getScene() {&#10;        return scene;&#10;    }&#10;}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/src/main/java/site/scalarstudios/scalarbudget/ScalarBudgetApplication.java">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/src/main/java/site/scalarstudios/scalarbudget/ScalarBudgetApplication.java" />
+              <option name="originalContent" value="package site.scalarstudios.scalarbudget;&#10;&#10;import javafx.application.Application;&#10;import javafx.stage.Stage;&#10;import site.scalarstudios.scalarbudget.scenes.DisplayScene;&#10;import site.scalarstudios.scalarbudget.scenes.LoadingScene;&#10;&#10;import java.util.List;&#10;&#10;public class ScalarBudgetApplication extends Application {&#10;    @Override&#10;    public void start(Stage primaryStage) {&#10;        // Callback for successful budget load&#10;        var onBudgetLoaded = (List&lt;BudgetItem&gt; budgetItems) -&gt; {&#10;            DisplayScene displayScene = new DisplayScene(budgetItems);&#10;            primaryStage.setScene(displayScene.getScene());&#10;        };&#10;        // Callback for error&#10;        var onError = (String errorMessage) -&gt; {&#10;            DisplayScene displayScene = new DisplayScene(errorMessage);&#10;            primaryStage.setScene(displayScene.getScene());&#10;        };&#10;        // Show loading scene&#10;        LoadingScene loadingScene = new LoadingScene(primaryStage, onBudgetLoaded, onError);&#10;        primaryStage.setTitle(&quot;Scalar Budget&quot;);&#10;        primaryStage.setScene(loadingScene.getScene());&#10;        primaryStage.show();&#10;    }&#10;}" />
+              <option name="updatedContent" value="package site.scalarstudios.scalarbudget.app;&#10;&#10;import javafx.application.Application;&#10;import javafx.stage.Stage;&#10;import site.scalarstudios.scalarbudget.model.BudgetItem;&#10;import site.scalarstudios.scalarbudget.scenes.DisplayScene;&#10;import site.scalarstudios.scalarbudget.scenes.LoadingScene;&#10;&#10;import java.util.List;&#10;&#10;public class ScalarBudgetApplication extends Application {&#10;    @Override&#10;    public void start(Stage primaryStage) {&#10;        // Callback for successful budget load&#10;        var onBudgetLoaded = (List&lt;BudgetItem&gt; budgetItems) -&gt; {&#10;            DisplayScene displayScene = new DisplayScene(budgetItems);&#10;            primaryStage.setScene(displayScene.getScene());&#10;        };&#10;        // Callback for error&#10;        var onError = (String errorMessage) -&gt; {&#10;            DisplayScene displayScene = new DisplayScene(errorMessage);&#10;            primaryStage.setScene(displayScene.getScene());&#10;        };&#10;        // Show loading scene&#10;        LoadingScene loadingScene = new LoadingScene(primaryStage, onBudgetLoaded, onError);&#10;        primaryStage.setTitle(&quot;Scalar Budget&quot;);&#10;        primaryStage.setScene(loadingScene.getScene());&#10;        primaryStage.show();&#10;    }&#10;}" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>
