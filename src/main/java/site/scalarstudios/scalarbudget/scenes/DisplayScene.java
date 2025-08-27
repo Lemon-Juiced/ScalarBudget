@@ -82,24 +82,67 @@ public class DisplayScene {
         };
 
         for (BudgetItem item : budgetItems) {
-            BudgetItemRow row = new BudgetItemRow(item, rowToDelete -> {
-                Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-                confirm.setTitle("Delete Item");
-                confirm.setHeaderText(null);
-                confirm.setContentText("Are you sure you want to delete '" + rowToDelete.getBudgetItem().getName() + "'?");
-                confirm.getDialogPane().setStyle("-fx-background-color: #23272e; -fx-text-fill: #e0e6ed;");
-                confirm.showAndWait().ifPresent(result -> {
-                    if (result == ButtonType.OK) {
-                        int idx = itemRows.indexOf(rowToDelete);
-                        if (idx >= 0) {
-                            itemRows.remove(idx);
-                            budgetItems.remove(rowToDelete.getBudgetItem());
-                            itemsBox.getChildren().remove(rowToDelete);
-                            updateTotal[0].run();
+            BudgetItemRow row = new BudgetItemRow(
+                item,
+                rowToDelete -> {
+                    Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+                    confirm.setTitle("Delete Item");
+                    confirm.setHeaderText(null);
+                    confirm.setContentText("Are you sure you want to delete '" + rowToDelete.getBudgetItem().getName() + "'?");
+                    confirm.getDialogPane().setStyle("-fx-background-color: #23272e; -fx-text-fill: #e0e6ed;");
+                    confirm.showAndWait().ifPresent(result -> {
+                        if (result == ButtonType.OK) {
+                            int idx = itemRows.indexOf(rowToDelete);
+                            if (idx >= 0) {
+                                itemRows.remove(idx);
+                                budgetItems.remove(rowToDelete.getBudgetItem());
+                                itemsBox.getChildren().remove(rowToDelete);
+                                updateTotal[0].run();
+                            }
                         }
-                    }
-                });
-            });
+                    });
+                },
+                rowToEdit -> {
+                    int idx = itemRows.indexOf(rowToEdit);
+                    if (idx < 0) return;
+                    final AddItemEditor[] editorRefArr = new AddItemEditor[1];
+                    editorRefArr[0] = new AddItemEditor((editedItem, editorRef) -> {
+                        // Update the row in place
+                        rowToEdit.updateModel();
+                        BudgetItemRow newRow = new BudgetItemRow(editedItem, rowToDelete -> {
+                            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+                            confirm.setTitle("Delete Item");
+                            confirm.setHeaderText(null);
+                            confirm.setContentText("Are you sure you want to delete '" + rowToDelete.getBudgetItem().getName() + "'?");
+                            confirm.getDialogPane().setStyle("-fx-background-color: #23272e; -fx-text-fill: #e0e6ed;");
+                            confirm.showAndWait().ifPresent(result -> {
+                                if (result == ButtonType.OK) {
+                                    int idx2 = itemRows.indexOf(rowToDelete);
+                                    if (idx2 >= 0) {
+                                        itemRows.remove(idx2);
+                                        budgetItems.remove(rowToDelete.getBudgetItem());
+                                        itemsBox.getChildren().remove(rowToDelete);
+                                        updateTotal[0].run();
+                                    }
+                                }
+                            });
+                        }, thisRow -> {
+                            // Recursively allow editing again
+                            int idx2 = itemRows.indexOf(thisRow);
+                            if (idx2 >= 0) {
+                                itemsBox.getChildren().set(idx2, editorRefArr[0]);
+                            }
+                        });
+                        itemRows.set(idx, newRow);
+                        itemsBox.getChildren().set(idx, newRow);
+                        updateTotal[0].run();
+                    }, () -> {
+                        // Cancel: restore the original row
+                        itemsBox.getChildren().set(idx, rowToEdit);
+                    }, rowToEdit.getBudgetItem());
+                    itemsBox.getChildren().set(idx, editorRefArr[0]);
+                }
+            );
             itemRows.add(row);
             // Add listeners for updates
             row.getAmountField().textProperty().addListener((obs, oldVal, newVal) -> {
@@ -126,7 +169,8 @@ public class DisplayScene {
         // --- Add Item Logic ---
         addButton.setOnAction(e -> {
             int addRowIndex = itemsBox.getChildren().indexOf(addRow);
-            AddItemEditor editor = new AddItemEditor((newItem, editorRef) -> {
+            final AddItemEditor[] editorRefArr = new AddItemEditor[1];
+            editorRefArr[0] = new AddItemEditor((newItem, editorRef) -> {
                 budgetItems.add(newItem);
                 BudgetItemRow newRow = new BudgetItemRow(newItem, rowToDelete -> {
                     Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
@@ -145,6 +189,12 @@ public class DisplayScene {
                             }
                         }
                     });
+                }, thisRow -> {
+                    // Recursively allow editing again
+                    int idx2 = itemRows.indexOf(thisRow);
+                    if (idx2 >= 0) {
+                        itemsBox.getChildren().set(idx2, editorRefArr[0]);
+                    }
                 });
                 itemRows.add(newRow);
                 // Add listeners for new fields
@@ -162,7 +212,7 @@ public class DisplayScene {
             }, () -> {
                 itemsBox.getChildren().set(addRowIndex, addRow);
             });
-            itemsBox.getChildren().set(addRowIndex, editor);
+            itemsBox.getChildren().set(addRowIndex, editorRefArr[0]);
         });
 
         ScrollPane scrollPane = new ScrollPane(itemsBox);

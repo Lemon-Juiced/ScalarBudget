@@ -20,22 +20,32 @@ import java.util.function.BiConsumer;
  * @author Lemon_Juiced
  */
 public class AddItemEditor extends HBox {
+    private final TextField nameField;
+    private final TextField amountField;
+    private final ComboBox<Period> periodBox;
+    private final CheckBox usePresetImageBox;
+    private BudgetItem editingItem = null;
+
     public AddItemEditor(BiConsumer<BudgetItem, AddItemEditor> onSave, Runnable onCancel) {
+        this(onSave, onCancel, null);
+    }
+
+    public AddItemEditor(BiConsumer<BudgetItem, AddItemEditor> onSave, Runnable onCancel, BudgetItem toEdit) {
         setAlignment(Pos.CENTER_LEFT);
         setSpacing(16);
         setStyle("-fx-background-color: #23272e; -fx-border-color: #333842; -fx-border-radius: 8; -fx-background-radius: 8;");
         setPadding(new Insets(10));
         setMaxWidth(Double.MAX_VALUE);
 
-        TextField nameField = new TextField();
+        nameField = new TextField();
         nameField.setPromptText("Name");
         nameField.setStyle("-fx-background-color: #23272e; -fx-text-fill: #e0e6ed; -fx-border-color: #444c56; -fx-font-size: 16; -fx-font-weight: bold;");
         nameField.setPrefWidth(120);
-        TextField amountField = new TextField();
+        amountField = new TextField();
         amountField.setPromptText("Amount");
         amountField.setStyle("-fx-background-color: #23272e; -fx-text-fill: #7fffd4; -fx-border-color: #444c56; -fx-font-size: 16; -fx-font-weight: bold;");
         amountField.setPrefWidth(100);
-        ComboBox<Period> periodBox = new ComboBox<>();
+        periodBox = new ComboBox<>();
         periodBox.getItems().addAll(Period.getAll());
         periodBox.setValue(Period.MONTH);
         periodBox.setCellFactory(cb -> new ListCell<>() {
@@ -60,7 +70,7 @@ public class AddItemEditor extends HBox {
 
         getChildren().addAll(nameField, amountField, periodBox, saveNewButton, cancelNewButton);
 
-        CheckBox usePresetImageBox = new CheckBox();
+        usePresetImageBox = new CheckBox();
         usePresetImageBox.setStyle("-fx-text-fill: #7fffd4; -fx-font-size: 13; -fx-font-weight: bold;");
         usePresetImageBox.setVisible(false);
         usePresetImageBox.setManaged(false);
@@ -79,6 +89,18 @@ public class AddItemEditor extends HBox {
             }
         });
 
+        if (toEdit != null) {
+            editingItem = toEdit;
+            nameField.setText(toEdit.getName());
+            amountField.setText(String.format("%.2f", toEdit.getAmount()));
+            periodBox.setValue(toEdit.getPeriod());
+            if (toEdit.isUsingImage() && toEdit.getImagePath() != null && !toEdit.getImagePath().isEmpty()) {
+                usePresetImageBox.setSelected(true);
+                usePresetImageBox.setVisible(true);
+                usePresetImageBox.setManaged(true);
+            }
+        }
+
         saveNewButton.setOnAction(ev -> {
             String name = nameField.getText().trim();
             String amtStr = amountField.getText().trim();
@@ -89,14 +111,29 @@ public class AddItemEditor extends HBox {
                 return;
             }
             double amt = Double.parseDouble(amtStr);
-            BudgetItem newItem;
-            if (usePresetImageBox.isVisible() && usePresetImageBox.isSelected()) {
-                String url = PresetImageLoader.getImageUrlForName(name);
-                newItem = new BudgetItem(name, amt, per, url);
+            if (editingItem != null) {
+                editingItem.setName(name);
+                editingItem.setAmount(amt);
+                editingItem.setPeriod(per);
+                if (usePresetImageBox.isVisible() && usePresetImageBox.isSelected()) {
+                    String url = PresetImageLoader.getImageUrlForName(name);
+                    editingItem.setUsingImage(true);
+                    editingItem.setImagePath(url);
+                } else {
+                    editingItem.setUsingImage(false);
+                    editingItem.setImagePath(null);
+                }
+                onSave.accept(editingItem, this);
             } else {
-                newItem = new BudgetItem(name, amt, per);
+                BudgetItem newItem;
+                if (usePresetImageBox.isVisible() && usePresetImageBox.isSelected()) {
+                    String url = PresetImageLoader.getImageUrlForName(name);
+                    newItem = new BudgetItem(name, amt, per, url);
+                } else {
+                    newItem = new BudgetItem(name, amt, per);
+                }
+                onSave.accept(newItem, this);
             }
-            onSave.accept(newItem, this);
         });
         cancelNewButton.setOnAction(ev -> onCancel.run());
     }

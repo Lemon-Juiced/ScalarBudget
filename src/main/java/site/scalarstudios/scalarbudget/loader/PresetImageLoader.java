@@ -19,7 +19,10 @@ public class PresetImageLoader {
             if (is != null) {
                 ObjectMapper mapper = new ObjectMapper();
                 Map<String, String> loaded = mapper.readValue(is, Map.class);
-                map.putAll(loaded);
+                // Store all keys as lowercase for case-insensitive lookup
+                for (Map.Entry<String, String> entry : loaded.entrySet()) {
+                    map.put(entry.getKey().toLowerCase(), entry.getValue());
+                }
             }
         } catch (IOException e) {
             // Ignore, leave map empty
@@ -28,15 +31,16 @@ public class PresetImageLoader {
     }
 
     public static String getImageUrlForName(String name) {
-        return PRESET_IMAGES.get(name);
+        if (name == null) return null;
+        return PRESET_IMAGES.get(name.toLowerCase());
     }
 
     public static boolean hasPresetForName(String name) {
-        return PRESET_IMAGES.containsKey(name);
+        if (name == null) return false;
+        return PRESET_IMAGES.containsKey(name.toLowerCase());
     }
 
     public static Map<String, String> getAllPresets() {
         return PRESET_IMAGES;
     }
 }
-
