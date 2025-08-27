@@ -53,6 +53,7 @@ public class AddItemEditor extends HBox {
             protected void updateItem(Period p, boolean empty) {
                 super.updateItem(p, empty);
                 setText(empty || p == null ? null : p.getDisplayName());
+                setStyle("-fx-text-fill: #e0e6ed; -fx-background-color: #23272e;");
             }
         });
         periodBox.setButtonCell(new ListCell<>() {
@@ -60,6 +61,7 @@ public class AddItemEditor extends HBox {
             protected void updateItem(Period p, boolean empty) {
                 super.updateItem(p, empty);
                 setText(empty || p == null ? null : p.getDisplayName());
+                setStyle("-fx-text-fill: #e0e6ed; -fx-background-color: #23272e;");
             }
         });
         periodBox.setStyle("-fx-background-color: #23272e; -fx-text-fill: #e0e6ed; -fx-border-color: #444c56; -fx-font-size: 14; -fx-font-weight: bold;");
