@@ -5,7 +5,7 @@
 - **Dark Mode Only**: ScalarBudget is always in dark mode, providing a visually comfortable experience for all users, day or night.
 - **Simple, Intuitive UI**: Add, edit, and review your budget items with ease. The interface is designed to be minimal and user-friendly.
 - **Flexible Periods**: Track expenses and income by day, week, month, year, and more. All totals are normalized to your selected period.
-- **Image Support**: Optionally add images to your budget items for quick visual identification. (WIP)
+- **Image Support**: Optionally add images to your budget items for quick visual identification.
 - **Local Data Storage**: All your data is stored locally in JSON files—no cloud, no accounts, no tracking.
 - **Open Source**: Licensed under the GPLv3. Contributions and forks are welcome!
 
